@@ -1,0 +1,440 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>뜨개콩의 도안</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <div id="scrim" class="scrim"></div>
+    <div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+    <header class="topbar glass-bar">
+      <div class="brand-block">
+        <a id="brand-link" class="brand-link" href="https://www.youtube.com/results?search_query=%EB%9C%A8%EA%B0%9C%EC%BD%A9" aria-label="뜨개콩 유튜브로 이동">
+          <span class="brand-mark"><img src="assets/brand-corgi.svg" alt="뜨개콩 클레이 코기 마크" /></span>
+          <span class="brand-meta">
+            <span class="eyebrow">TTUGEKONG KNIT NOTES</span>
+            <h1>뜨개콩의 도안</h1>
+            <span class="brand-kicker">뜨개콩 유튜브로 이동</span>
+          </span>
+        </a>
+      </div>
+
+      <div class="drawer-actions">
+        <button id="btn-open-left">도구함</button>
+        <button id="btn-open-right">차트 설정</button>
+        <button id="btn-open-settings">기호 정리</button>
+      </div>
+
+      <div class="top-actions desktop-actions">
+        <button id="btn-new">새 차트</button>
+        <button id="btn-save-json">저장</button>
+        <button id="btn-load-json">불러오기</button>
+        <input id="input-load-json" type="file" accept="application/json,.json" hidden />
+        <button id="btn-export-svg">SVG</button>
+        <button id="btn-export-png">PNG</button>
+        <button id="btn-print">인쇄</button>
+        <button id="btn-undo">Undo</button>
+        <button id="btn-redo">Redo</button>
+      </div>
+
+      <div class="top-actions mobile-actions">
+        <button id="btn-mobile-symbols">도구함</button>
+        <button id="btn-mobile-tools">차트</button>
+        <button id="btn-mobile-inspect">기호</button>
+        <button id="btn-mobile-settings">저장</button>
+      </div>
+    </header>
+
+    <main class="workspace-layout">
+      <section class="editor-column">
+        <div class="canvas-top glass-panel soft-row">
+          <div class="hero-copy">
+            <div class="eyebrow">대바늘 차트 전용</div>
+            <div id="row-readout" class="row-readout">1단</div>
+            <div id="active-indicators" class="active-indicators" aria-live="polite"></div>
+          </div>
+          <div id="selection-glance" class="selection-glance" aria-live="polite"></div>
+          <div class="canvas-actions">
+            <button id="btn-zoom-out">-</button>
+            <span id="zoom-label" class="zoom-chip">100%</span>
+            <button id="btn-zoom-in">+</button>
+            <button id="btn-zoom-reset">화면 맞춤</button>
+          </div>
+        </div>
+
+        <div class="mobile-quick-strip glass-panel">
+          <button class="tool-btn quick-tool" data-tool="brush">그리기</button>
+          <button class="tool-btn quick-tool" data-tool="eraser">지우개</button>
+          <button class="tool-btn quick-tool" data-tool="blockEraser">큰 지우개</button>
+          <button class="tool-btn quick-tool" data-tool="select">영역 선택</button>
+          <button id="btn-mobile-save-pattern">패턴 저장</button>
+          <button id="btn-mobile-pattern-screen">패턴 붙여넣기</button>
+        </div>
+
+        <div id="canvas-wrapper" class="canvas-wrapper glass-panel">
+          <canvas id="editor-canvas" tabindex="0" aria-label="Knit chart editor canvas"></canvas>
+          <div class="floating-controls">
+            <button id="btn-float-undo" class="icon-btn">↺</button>
+            <button id="btn-float-redo" class="icon-btn">↻</button>
+          </div>
+        </div>
+
+        <div class="status-bar glass-panel">
+          <div id="status-line">준비됨</div>
+          <div id="cursor-line">현재 칸: 1단 / 1코</div>
+        </div>
+      </section>
+
+      <aside id="left-panel" class="workspace-panel left-panel glass-panel drawer-panel">
+        <div class="panel-head sticky-head">
+          <div>
+            <div class="eyebrow">TOOLS</div>
+            <h2>도구함</h2>
+          </div>
+          <button id="btn-close-left-panel" class="icon-btn" aria-label="닫기">닫기</button>
+        </div>
+
+        <section id="section-symbols" class="panel-section">
+          <div class="section-title-row">
+            <h3>기호 고르기</h3>
+            <span class="section-chip">KO_KNIT</span>
+          </div>
+          <input id="symbol-search" class="search-input" type="search" placeholder="예: 겉뜨기, 줄임, 교차" />
+          <div id="symbol-palette" class="symbol-palette"></div>
+        </section>
+
+        <section id="section-tools" class="panel-section">
+          <div class="section-title-row">
+            <h3>그리기 도구</h3>
+            <span class="section-help">단축키 지원</span>
+          </div>
+          <div class="tool-grid">
+            <button class="tool-btn" data-tool="brush">그리기</button>
+            <button class="tool-btn" data-tool="paint">칠 도구</button>
+            <button class="tool-btn" data-tool="eraser">지우개</button>
+            <button class="tool-btn" data-tool="blockEraser">큰 지우개</button>
+            <button class="tool-btn" data-tool="select">영역 선택</button>
+            <button class="tool-btn" data-tool="fill">기호 채우기</button>
+            <button class="tool-btn" data-tool="line">직선</button>
+            <button class="tool-btn" data-tool="rect">사각형</button>
+            <button class="tool-btn" data-tool="circle">원</button>
+            <button class="tool-btn" data-tool="repeatBox">반복 표시</button>
+            <button class="tool-btn" data-tool="textNote">메모</button>
+            <button class="tool-btn" data-tool="pan">이동</button>
+          </div>
+        </section>
+
+        <section id="section-color" class="panel-section">
+          <div class="section-title-row">
+            <h3>칸 색상</h3>
+            <span class="section-help">칠 도구 전용 색상</span>
+          </div>
+          <div class="color-controls-grid">
+            <label for="cell-fill-color">색상</label>
+            <div class="inline-form compact-form color-inline">
+              <input id="cell-fill-color" type="color" value="#dbeafe" />
+              <button id="btn-clear-fill-color" type="button">색 지우기</button>
+            </div>
+            <label class="toggle-line legacy-fill-toggle" hidden><input id="apply-fill-color" type="checkbox" /> 그릴 때 배경색도 함께 칠하기</label>
+            <label class="toggle-line"><input id="shape-fill" type="checkbox" checked /> 사각형 / 원 내부 채우기</label>
+            <label for="eraser-size">큰 지우개 크기</label>
+            <input id="eraser-size" type="number" min="2" max="12" value="3" />
+          </div>
+        </section>
+
+        <section id="section-actions" class="panel-section">
+          <div class="section-title-row">
+            <h3>선택한 영역 작업</h3>
+            <span class="section-help">패턴으로 저장해서 사용</span>
+          </div>
+          <div class="action-grid">
+            <button id="btn-save-pattern">선택 영역 저장</button>
+            <button id="btn-open-pattern-screen">패턴 붙여넣기</button>
+            <button id="btn-pattern-paste-mode">선택한 패턴 놓기</button>
+            <button id="btn-mirror-h">좌우 뒤집기</button>
+            <button id="btn-mirror-v">상하 뒤집기</button>
+            <button id="btn-selection-clear">선택 해제</button>
+            <button id="btn-cancel-paste">패턴 놓기 취소</button>
+          </div>
+          <div class="inline-form compact-form">
+            <label for="repeat-times">반복 수</label>
+            <input id="repeat-times" type="number" min="2" value="2" />
+            <button id="btn-add-repeat">반복 표시 추가</button>
+          </div>
+        </section>
+
+        <section id="section-grid-edit" class="panel-section">
+          <div class="section-title-row">
+            <h3>행 / 열 편집</h3>
+            <span class="section-help">필요한 만큼 늘리거나 줄이기</span>
+          </div>
+          <div class="form-grid">
+            <label for="row-index">행 위치</label>
+            <input id="row-index" type="number" min="1" value="1" />
+            <label for="row-count">행 개수</label>
+            <input id="row-count" type="number" min="1" value="1" />
+            <button id="btn-row-insert">행 삽입</button>
+            <button id="btn-row-delete">행 삭제</button>
+            <label for="col-index">열 위치</label>
+            <input id="col-index" type="number" min="1" value="1" />
+            <label for="col-count">열 개수</label>
+            <input id="col-count" type="number" min="1" value="1" />
+            <button id="btn-col-insert">열 삽입</button>
+            <button id="btn-col-delete">열 삭제</button>
+          </div>
+        </section>
+
+        <section id="section-stamps" class="panel-section">
+          <div class="section-title-row">
+            <h3>저장한 패턴</h3>
+            <span class="section-help">선택하고 바로 놓기</span>
+          </div>
+          <div class="inline-form compact-form">
+            <input id="stamp-name" type="text" placeholder="예: 2x2 고무뜨기" />
+            <button id="btn-save-stamp">선택 영역 저장</button>
+          </div>
+          <div id="stamp-list" class="stamp-list"></div>
+          <button id="btn-delete-stamp">선택 패턴 삭제</button>
+        </section>
+      </aside>
+
+      <aside id="right-panel" class="workspace-panel right-panel glass-panel drawer-panel">
+        <div class="panel-head sticky-head">
+          <div>
+            <div class="eyebrow">CHART</div>
+            <h2>차트 설정</h2>
+          </div>
+          <button id="btn-close-right-panel" class="icon-btn" aria-label="닫기">닫기</button>
+        </div>
+
+        <section id="section-chart-size" class="panel-section">
+          <div class="section-title-row">
+            <h3>차트 크기</h3>
+            <span class="section-help">코 수, 단 수, 칸 크기</span>
+          </div>
+          <div class="form-grid">
+            <label for="grid-cols">코(열)</label>
+            <input id="grid-cols" type="number" min="1" value="24" />
+            <label for="grid-rows">단(행)</label>
+            <input id="grid-rows" type="number" min="1" value="24" />
+            <label for="cell-size">칸 크기</label>
+            <input id="cell-size" type="number" min="16" max="64" value="28" />
+            <button id="btn-apply-grid">적용</button>
+          </div>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-title-row">
+            <h3>뜨기 방식</h3>
+            <span class="section-help">평면 / 원형</span>
+          </div>
+          <div class="form-grid">
+            <label for="chart-mode">모드</label>
+            <select id="chart-mode">
+              <option value="flat">평면뜨기</option>
+              <option value="circular">원형뜨기</option>
+            </select>
+            <label for="circular-direction">원형 방향</label>
+            <select id="circular-direction">
+              <option value="rtl">오른쪽에서 왼쪽</option>
+              <option value="ltr">왼쪽에서 오른쪽</option>
+            </select>
+          </div>
+          <label class="toggle-line"><input id="even-row-help" type="checkbox" checked /> 짝수단은 겉/안을 반대로 읽는 도움말 켜기</label>
+          <label class="toggle-line"><input id="edge-slip-guide" type="checkbox" /> 가장자리 걸러뜨기(sl) 안내 켜기</label>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-title-row">
+            <h3>화면 표시</h3>
+            <span class="section-help">보기 / 인쇄용</span>
+          </div>
+          <label class="toggle-line"><input id="show-grid" type="checkbox" checked /> 격자선 보이기</label>
+          <label class="toggle-line"><input id="show-row-numbers" type="checkbox" checked /> 단 번호 보이기</label>
+          <label class="toggle-line"><input id="show-col-numbers" type="checkbox" checked /> 코 번호 보이기</label>
+          <label class="toggle-line"><input id="legend-in-svg" type="checkbox" checked /> SVG에 사용한 기호 설명표 넣기</label>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-title-row">
+            <h3>단 이동</h3>
+            <span class="section-help">원하는 단으로 바로 가기</span>
+          </div>
+          <div class="inline-form compact-form">
+            <label for="row-jump">이동할 단</label>
+            <input id="row-jump" type="number" min="1" value="1" />
+            <button id="btn-row-jump">이동</button>
+          </div>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-title-row">
+            <h3>사용한 기호 설명표</h3>
+            <span class="section-help">현재 차트에 있는 기호만 표시</span>
+          </div>
+          <div class="table-wrap">
+            <table id="legend-table" class="legend-table">
+              <thead>
+                <tr>
+                  <th>기호</th>
+                  <th>이름</th>
+                  <th>짧은 표기</th>
+                  <th>사용 수</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-title-row">
+            <h3>한 줄 설명</h3>
+            <span class="section-help">행 단위로 쉽게 읽기</span>
+          </div>
+          <textarea id="narrative-output" rows="9" readonly></textarea>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-title-row">
+            <h3>메모 목록</h3>
+            <span class="section-help">차트 옆 설명 정리</span>
+          </div>
+          <div id="note-list" class="note-list"></div>
+        </section>
+      </aside>
+    </main>
+
+    <section id="settings-screen" class="settings-screen">
+      <div class="settings-shell glass-panel">
+        <div class="panel-head sticky-head settings-head">
+          <div>
+            <div class="eyebrow">SYMBOL MANAGEMENT</div>
+            <h2>기호 정리</h2>
+          </div>
+          <button id="btn-close-settings" class="icon-btn">닫기</button>
+        </div>
+
+        <div class="settings-grid">
+          <section class="panel-section">
+            <div class="section-title-row">
+              <h3>정렬 방식</h3>
+              <span class="section-help">기본은 많이 쓴 순서</span>
+            </div>
+            <div class="inline-form compact-form">
+              <label for="symbol-sort-mode">정렬</label>
+              <select id="symbol-sort-mode">
+                <option value="usage">많이 쓴 순서</option>
+                <option value="custom">내가 정한 순서</option>
+                <option value="name">이름 순서</option>
+              </select>
+              <button id="btn-reset-symbol-order">순서 초기화</button>
+            </div>
+            <div class="inline-form compact-form">
+              <label for="symbol-settings-search">기호 찾기</label>
+              <input id="symbol-settings-search" class="search-input" type="search" placeholder="이름, 표기로 찾기" />
+            </div>
+            <p class="settings-copy">기호를 더 자주 쓰는 순서대로 보거나, 직접 위아래로 정렬할 수 있습니다.</p>
+          </section>
+
+          <section class="panel-section settings-list-panel">
+            <div class="section-title-row">
+              <h3>기호 순서 바꾸기</h3>
+              <span class="section-help">위 / 아래 버튼으로 이동</span>
+            </div>
+            <div id="symbol-settings-list" class="symbol-settings-list"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section id="pattern-screen" class="pattern-screen">
+      <div class="pattern-shell glass-panel">
+        <div class="panel-head sticky-head pattern-head">
+          <div>
+            <div class="eyebrow">PATTERN LIBRARY</div>
+            <h2>패턴 붙여넣기</h2>
+          </div>
+          <button id="btn-close-pattern-screen" class="icon-btn">닫기</button>
+        </div>
+
+        <div class="pattern-grid">
+          <section class="panel-section pattern-list-panel">
+            <div class="section-title-row">
+              <h3>저장된 패턴</h3>
+              <span class="section-help">하나를 골라 미리보기</span>
+            </div>
+            <div id="pattern-picker-list" class="stamp-list pattern-picker-list"></div>
+          </section>
+
+          <section class="panel-section pattern-preview-panel">
+            <div class="section-title-row">
+              <h3>미리보기</h3>
+              <span class="section-help">오른쪽 아래 칸이 기준</span>
+            </div>
+            <div id="pattern-preview-board" class="pattern-preview-board"></div>
+            <div id="pattern-preview-meta" class="pattern-preview-meta">저장된 패턴을 선택하세요.</div>
+            <div class="action-grid pattern-action-grid">
+              <button id="btn-pattern-apply">이 패턴 놓기</button>
+              <button id="btn-pattern-delete">이 패턴 삭제</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <nav class="mobile-nav action-dock glass-bar" aria-label="빠른 작업">
+      <button id="btn-mobile-nav-symbols"><span class="dock-text">도구함</span><span class="dock-inline-shortcut">D</span></button>
+      <button id="btn-mobile-nav-tools" class="tool-btn dock-tool" data-tool="brush"><span class="dock-text">그리기</span><span class="dock-inline-shortcut">B</span></button>
+      <button id="btn-dock-paint" class="tool-btn dock-tool" data-tool="paint"><span class="dock-text">칠 도구</span><span class="dock-inline-shortcut">C</span></button>
+      <button id="btn-dock-eraser" class="tool-btn dock-tool" data-tool="eraser"><span class="dock-text">지우개</span><span class="dock-inline-shortcut">E</span></button>
+      <button id="btn-dock-block-eraser" class="tool-btn dock-tool" data-tool="blockEraser"><span class="dock-text">큰 지우개</span><span class="dock-inline-shortcut">Shift+E</span></button>
+      <button id="btn-dock-select" class="tool-btn dock-tool" data-tool="select"><span class="dock-text">영역 선택</span><span class="dock-inline-shortcut">Q</span></button>
+      <button id="btn-dock-line" class="tool-btn dock-tool" data-tool="line"><span class="dock-text">직선</span><span class="dock-inline-shortcut">L</span></button>
+      <button id="btn-dock-rect" class="tool-btn dock-tool" data-tool="rect"><span class="dock-text">사각형</span><span class="dock-inline-shortcut">R</span></button>
+      <button id="btn-dock-circle" class="tool-btn dock-tool" data-tool="circle"><span class="dock-text">원</span><span class="dock-inline-shortcut">O</span></button>
+      <button id="btn-mobile-nav-check"><span class="dock-text">패턴 저장</span><span class="dock-inline-shortcut">Alt+S</span></button>
+      <button id="btn-mobile-nav-settings"><span class="dock-text">패턴 붙여넣기</span><span class="dock-inline-shortcut">P</span></button>
+    </nav>
+  </div>
+
+  <script src="src/symbols/ko_knit.js"></script>
+  <script src="src/cells.js"></script>
+  <script src="src/store.js"></script>
+  <script src="src/tools/brush.js"></script>
+  <script src="src/tools/paint.js"></script>
+  <script src="src/tools/eraser.js"></script>
+  <script src="src/tools/blockEraser.js"></script>
+  <script src="src/tools/fill.js"></script>
+  <script src="src/tools/select.js"></script>
+  <script src="src/tools/line.js"></script>
+  <script src="src/tools/rect.js"></script>
+  <script src="src/tools/circle.js"></script>
+  <script src="src/tools/repeatBox.js"></script>
+  <script src="src/tools/textNote.js"></script>
+  <script src="src/tools/stamp.js"></script>
+  <script src="src/tools/pan.js"></script>
+  <script src="src/editorCanvas.js"></script>
+  <script src="src/export/exportJson.js"></script>
+  <script src="src/export/importJson.js"></script>
+  <script src="src/export/exportSvg.js"></script>
+  <script src="src/export/exportPng.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
