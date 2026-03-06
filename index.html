@@ -23,6 +23,17 @@
         </a>
       </div>
 
+      <section id="header-project-panel" class="header-project-panel glass-panel" aria-label="프로젝트 이름">
+        <div class="header-project-head">
+          <span class="eyebrow">PROJECT</span>
+          <button id="btn-header-project-toggle" class="header-project-toggle" type="button" aria-expanded="false">이름 수정</button>
+        </div>
+        <button id="header-project-title" class="header-project-title" type="button" title="프로젝트 이름 수정">새 대바늘 차트</button>
+        <div id="header-project-editor" class="header-project-editor" hidden>
+          <input id="header-project-title-input" type="text" maxlength="80" placeholder="예: 봄 꽈배기 머플러" />
+          <button id="btn-header-project-apply" type="button">적용</button>
+        </div>
+      </section>
       <div class="drawer-actions">
         <button id="btn-open-left">도구함</button>
         <button id="btn-open-right">차트 설정</button>
@@ -55,9 +66,9 @@
           <div class="hero-copy">
             <div class="eyebrow">대바늘 차트 전용</div>
             <div id="row-readout" class="row-readout">1단</div>
+            <div id="project-title-chip" class="project-title-chip">새 대바늘 차트</div>
             <div id="active-indicators" class="active-indicators" aria-live="polite"></div>
           </div>
-          <div id="selection-glance" class="selection-glance" aria-live="polite"></div>
           <div class="canvas-actions">
             <button id="btn-zoom-out">-</button>
             <span id="zoom-label" class="zoom-chip">100%</span>
@@ -226,6 +237,17 @@
             <button id="btn-apply-grid">적용</button>
           </div>
         </section>
+        <section class="panel-section">
+          <div class="section-title-row">
+            <h3>프로젝트 이름</h3>
+            <span class="section-help">차트 제목</span>
+          </div>
+          <div class="inline-form compact-form">
+            <label for="project-title-input">이름</label>
+            <input id="project-title-input" type="text" maxlength="80" placeholder="예: 봄 꽈배기 머플러" />
+            <button id="btn-apply-project-title">적용</button>
+          </div>
+        </section>
 
         <section class="panel-section">
           <div class="section-title-row">
@@ -308,6 +330,7 @@
         </section>
       </aside>
     </main>
+    <aside id="selection-glance" class="selection-glance" aria-live="polite"></aside>
 
     <section id="settings-screen" class="settings-screen">
       <div class="settings-shell glass-panel">
@@ -399,6 +422,7 @@
       <button id="btn-dock-circle" class="tool-btn dock-tool" data-tool="circle"><span class="dock-text">원</span><span class="dock-inline-shortcut">O</span></button>
       <button id="btn-mobile-nav-check"><span class="dock-text">패턴 저장</span><span class="dock-inline-shortcut">Alt+S</span></button>
       <button id="btn-mobile-nav-settings"><span class="dock-text">패턴 붙여넣기</span><span class="dock-inline-shortcut">P</span></button>
+      <button id="btn-dock-mode-toggle"><span class="dock-text">확장</span><span class="dock-inline-shortcut">전체 도구</span></button>
     </nav>
   </div>
 
@@ -426,6 +450,9 @@
   <script src="src/app.js"></script>
 </body>
 </html>
+
+
+
 
 
 

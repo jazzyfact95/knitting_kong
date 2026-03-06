@@ -1757,12 +1757,12 @@ button,
 
 .selection-glance {
   position: fixed;
+  top: 108px;
   right: 16px;
-  bottom: calc(var(--dock-height-desktop) + 18px + env(safe-area-inset-bottom));
   z-index: 58;
-  width: min(520px, calc(100vw - 32px));
+  width: min(340px, calc(100vw - 32px));
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
   pointer-events: none;
 }
@@ -1881,5 +1881,220 @@ button,
 @media print {
   .selection-glance {
     display: none !important;
+  }
+}
+
+
+@media (max-width: 980px) {
+  body.dock-basic {
+    --dock-height-mobile: 164px;
+  }
+
+  body.dock-basic #btn-dock-paint,
+  body.dock-basic #btn-dock-block-eraser,
+  body.dock-basic #btn-dock-line,
+  body.dock-basic #btn-dock-rect,
+  body.dock-basic #btn-dock-circle {
+    display: none;
+  }
+
+  body.dock-basic .action-dock {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  body.dock-basic .selection-glance {
+    bottom: calc(var(--dock-height-mobile) + 10px + env(safe-area-inset-bottom));
+  }
+}
+@media (max-width: 1180px) {
+  .selection-glance {
+    top: 104px;
+    bottom: auto;
+    width: min(320px, calc(100vw - 24px));
+  }
+}
+
+@media (max-width: 980px) {
+  .selection-glance {
+    top: auto;
+    bottom: calc(var(--dock-height-mobile) + 10px + env(safe-area-inset-bottom));
+    grid-template-columns: 1fr;
+  }
+}
+
+.project-title-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 34ch;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,244,235,0.82));
+  color: #8c5837;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selection-glance {
+  z-index: 34;
+  opacity: 1;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+body.show-left-panel .selection-glance,
+body.show-right-panel .selection-glance,
+body.show-settings .selection-glance,
+body.show-pattern-screen .selection-glance {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+}
+/* Header Project Panel + Desktop Dock Modes */
+.topbar {
+  grid-template-columns: auto minmax(280px, 360px) auto 1fr;
+  align-items: stretch;
+}
+
+.brand-block,
+.drawer-actions,
+.top-actions,
+.mobile-actions {
+  align-self: center;
+}
+
+.header-project-panel {
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 24px;
+  display: grid;
+  gap: 10px;
+  background: linear-gradient(180deg, rgba(255, 251, 246, 0.92), rgba(255, 243, 233, 0.82));
+}
+
+.header-project-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.header-project-toggle {
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.header-project-title {
+  width: 100%;
+  min-height: 46px;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #7f4b2f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-project-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.header-project-editor[hidden] {
+  display: none;
+}
+
+.header-project-panel.is-editing .header-project-title {
+  box-shadow: 0 0 0 3px rgba(245, 144, 65, 0.18), 0 16px 28px rgba(179, 100, 44, 0.12);
+}
+
+body.dock-basic {
+  --dock-height-desktop: 110px;
+}
+
+body.dock-basic #btn-dock-paint,
+body.dock-basic #btn-dock-block-eraser,
+body.dock-basic #btn-dock-line,
+body.dock-basic #btn-dock-rect,
+body.dock-basic #btn-dock-circle {
+  display: none !important;
+}
+
+body.dock-basic .action-dock {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+@media (max-width: 1240px) {
+  .topbar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .header-project-panel {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+
+  .desktop-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1180px) {
+  body.dock-basic {
+    --dock-height-desktop: 176px;
+  }
+
+  body.dock-basic .action-dock {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .header-project-panel {
+    order: 2;
+    padding: 10px;
+  }
+
+  .header-project-title {
+    min-height: 42px;
+    font-size: 15px;
+  }
+
+  .header-project-editor {
+    grid-template-columns: 1fr auto;
+  }
+
+  body.dock-basic {
+    --dock-height-mobile: 164px;
+    --dock-height-desktop: 164px;
+  }
+
+  body.dock-basic .action-dock {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  body.dock-basic .selection-glance {
+    bottom: calc(var(--dock-height-mobile) + 10px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 640px) {
+  .header-project-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .header-project-editor {
+    grid-template-columns: 1fr;
   }
 }

@@ -325,6 +325,27 @@
         return true;
       },
 
+      getHoverPreviewCells: function (state) {
+        const s = state || this.getState();
+        const hover = this.transient.hoverCell;
+        if (!hover || this.transient.pasteMode || (this.transient.shapePreview && this.transient.shapePreview.cells && this.transient.shapePreview.cells.length)) {
+          return [];
+        }
+        if (s.currentTool === "blockEraser") {
+          const block = utils.clamp(Number(s.eraserSize) || 3, 2, 12);
+          const radius = Math.floor(block / 2);
+          const points = [];
+          for (let row = hover.row + radius; row >= hover.row - radius; row -= 1) {
+            for (let col = hover.col - radius; col <= hover.col + radius; col += 1) {
+              points.push({ row: row, col: col });
+            }
+          }
+          return uniquePoints(points).filter(function (point) {
+            return point.row >= 0 && point.row < s.rows && point.col >= 0 && point.col < s.cols;
+          });
+        }
+        return [hover];
+      },
       startPasteMode: function () {
         const state = this.getState();
         if (!state.clipboard) {
@@ -1454,15 +1475,47 @@
           context.restore();
         }
 
-        if (this.transient.hoverCell) {
-          const hoverPoint = this.cellToWorld(this.transient.hoverCell.row, this.transient.hoverCell.col, state);
+        const hoverPoints = this.getHoverPreviewCells(state);
+        if (hoverPoints.length) {
+          const currentTool = state.currentTool;
+          const toolMeta = tools[currentTool] || {};
+          let hoverFill = "rgba(37, 99, 235, 0.12)";
+          let hoverStroke = "rgba(37, 99, 235, 0.82)";
+
+          if (currentTool === "eraser" || currentTool === "blockEraser") {
+            hoverFill = "rgba(239, 68, 68, 0.14)";
+            hoverStroke = "rgba(220, 38, 38, 0.8)";
+          } else if (toolMeta.usesColor) {
+            hoverFill = hexToRgba(state.currentFillColor, 0.24);
+            hoverStroke = hexToRgba(state.currentFillColor, 0.9);
+          } else if (currentTool === "select") {
+            hoverFill = "rgba(59, 130, 246, 0.14)";
+            hoverStroke = "rgba(37, 99, 235, 0.88)";
+          } else if (currentTool === "fill") {
+            hoverFill = "rgba(99, 102, 241, 0.14)";
+            hoverStroke = "rgba(79, 70, 229, 0.88)";
+          }
+
           context.save();
-          context.strokeStyle = "rgba(15, 23, 42, 0.28)";
-          context.lineWidth = 1.5;
-          context.strokeRect(hoverPoint.x + 1, hoverPoint.y + 1, size - 2, size - 2);
+          context.fillStyle = hoverFill;
+          hoverPoints.forEach(function (point) {
+            const world = this.cellToWorld(point.row, point.col, state);
+            context.fillRect(world.x, world.y, size, size);
+          }, this);
+          context.strokeStyle = hoverStroke;
+          context.lineWidth = 1.6;
+          hoverPoints.forEach(function (point) {
+            const world = this.cellToWorld(point.row, point.col, state);
+            context.strokeRect(world.x + 1, world.y + 1, size - 2, size - 2);
+          }, this);
+          if (toolMeta.usesSymbol && hoverPoints.length <= 12) {
+            hoverPoints.forEach(function (point) {
+              const world = this.cellToWorld(point.row, point.col, state);
+              pack.drawSymbolCanvas(context, state.currentSymbol, world.x, world.y, size, "#1d4ed8", 0.48);
+            }, this);
+          }
           context.restore();
         }
-
         if (this.transient.shapePreview && this.transient.shapePreview.cells.length) {
           context.save();
           context.fillStyle = hexToRgba(state.currentFillColor, 0.24);

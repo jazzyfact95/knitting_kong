@@ -1,5 +1,6 @@
 ﻿(function () {
   const AUTOSAVE_KEY = "knitchart_studio_autosave_v2";
+  const MOBILE_DOCK_MODE_KEY = "knitchart_mobile_dock_mode_v1";
   const cellUtils = window.KnitChartCells;
 
   function $(id) {
@@ -395,6 +396,7 @@
     btnMobileNavTools: $("btn-mobile-nav-tools"),
     btnMobileNavCheck: $("btn-mobile-nav-check"),
     btnMobileNavSettings: $("btn-mobile-nav-settings"),
+    btnDockModeToggle: $("btn-dock-mode-toggle"),
     btnCloseLeftPanel: $("btn-close-left-panel"),
     btnCloseRightPanel: $("btn-close-right-panel"),
     btnZoomOut: $("btn-zoom-out"),
@@ -402,6 +404,13 @@
     btnZoomReset: $("btn-zoom-reset"),
     zoomLabel: $("zoom-label"),
     rowReadout: $("row-readout"),
+    projectTitleChip: $("project-title-chip"),
+    headerProjectPanel: $("header-project-panel"),
+    headerProjectTitle: $("header-project-title"),
+    headerProjectEditor: $("header-project-editor"),
+    headerProjectTitleInput: $("header-project-title-input"),
+    btnHeaderProjectToggle: $("btn-header-project-toggle"),
+    btnHeaderProjectApply: $("btn-header-project-apply"),
     activeIndicators: $("active-indicators"),
     selectionGlance: $("selection-glance"),
     statusLine: $("status-line"),
@@ -441,6 +450,8 @@
     gridRows: $("grid-rows"),
     cellSize: $("cell-size"),
     btnApplyGrid: $("btn-apply-grid"),
+    projectTitleInput: $("project-title-input"),
+    btnApplyProjectTitle: $("btn-apply-project-title"),
     chartMode: $("chart-mode"),
     circularDirection: $("circular-direction"),
     evenRowHelp: $("even-row-help"),
@@ -569,6 +580,49 @@
   function closeDrawersForCompact() {
     if (isCompactScreen()) {
       setOverlay(null);
+    }
+  }
+
+  function applyDockMode(expanded) {
+    const isExpanded = !!expanded;
+    ui.body.classList.toggle("dock-basic", !isExpanded);
+    if (ui.btnDockModeToggle) {
+      ui.btnDockModeToggle.innerHTML = isExpanded
+        ? '<span class="dock-text">기본</span><span class="dock-inline-shortcut">핵심만</span>'
+        : '<span class="dock-text">확장</span><span class="dock-inline-shortcut">전체 도구</span>';
+    }
+  }
+
+  function loadDockModePreference() {
+    try {
+      return localStorage.getItem(MOBILE_DOCK_MODE_KEY) === "expanded";
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function setDockModePreference(expanded) {
+    try {
+      localStorage.setItem(MOBILE_DOCK_MODE_KEY, expanded ? "expanded" : "basic");
+    } catch (error) {}
+    applyDockMode(expanded);
+  }
+
+  function setHeaderProjectEditing(isEditing) {
+    const nextEditing = !!isEditing;
+    if (ui.headerProjectPanel) {
+      ui.headerProjectPanel.classList.toggle("is-editing", nextEditing);
+    }
+    if (ui.headerProjectEditor) {
+      ui.headerProjectEditor.hidden = !nextEditing;
+    }
+    if (ui.btnHeaderProjectToggle) {
+      ui.btnHeaderProjectToggle.textContent = nextEditing ? "접기" : "이름 수정";
+      ui.btnHeaderProjectToggle.setAttribute("aria-expanded", String(nextEditing));
+    }
+    if (nextEditing && ui.headerProjectTitleInput) {
+      ui.headerProjectTitleInput.focus();
+      ui.headerProjectTitleInput.select();
     }
   }
 
@@ -795,6 +849,24 @@
     ui.rowReadout.textContent = state.currentRow + "단 · " + formatSurfaceLabel(surface) + " · " + dirText + " · " + modeLabel;
   }
 
+  function renderProjectTitle(state) {
+    const title = String(state.title || "새 대바늘 차트").trim() || "새 대바늘 차트";
+    if (ui.projectTitleChip) {
+      ui.projectTitleChip.textContent = title;
+      ui.projectTitleChip.title = title;
+    }
+    if (ui.headerProjectTitle) {
+      ui.headerProjectTitle.textContent = title;
+      ui.headerProjectTitle.title = title;
+    }
+    if (ui.projectTitleInput && document.activeElement !== ui.projectTitleInput) {
+      ui.projectTitleInput.value = title;
+    }
+    if (ui.headerProjectTitleInput && document.activeElement !== ui.headerProjectTitleInput) {
+      ui.headerProjectTitleInput.value = title;
+    }
+    document.title = title + " | 뜨개콩의 도안";
+  }
   function renderActiveIndicators(state) {
     if (!ui.activeIndicators) {
       return;
@@ -827,39 +899,32 @@
     const symbol = pack.getSymbol(state.currentSymbol);
     const tool = getToolDefinition(state.currentTool);
     const shortcut = getToolShortcut(state.currentTool);
-    const toolMeta = shortcut ? ("단축키 " + shortcut) : "도구 선택";
-    let title = "지금 그려질 기호";
-    let visual = '<span class="selection-visual legend-cell-icon">' + pack.createPreviewSvg(symbol.id, 34) + '</span>';
-    let mainLabel = symbol.name_ko;
-    let helper = "그리기, 직선, 사각형, 원, 기호 채우기에 이 기호가 들어갑니다.";
-
-    if (toolUsesColor(state.currentTool)) {
-      title = "지금 칠해질 색";
-      visual = '<span class="selection-visual selection-color-chip"><span class="selection-color-dot" style="background:' + escapeHtml(state.currentFillColor) + '"></span></span>';
-      mainLabel = state.currentFillColor.toUpperCase();
-      helper = "칠 도구는 기호를 바꾸지 않고 칸 배경만 칠합니다.";
-    } else if (!toolUsesSymbol(state.currentTool)) {
-      title = "다음에 그릴 기호";
-      helper = "다른 도구를 쓰는 중이어도, 그리기/직선/사각형/원으로 바꾸면 이 기호가 사용됩니다.";
-    }
+    const toolMeta = shortcut ? ("단축키 " + shortcut) : "단축키 없음";
+    const toolDetail = toolUsesColor(state.currentTool)
+      ? '<span class="selection-inline-meta"><span class="selection-color-dot" style="background:' + escapeHtml(state.currentFillColor) + '"></span>칠 색상 ' + escapeHtml(state.currentFillColor.toUpperCase()) + '</span>'
+      : '<span class="selection-inline-meta">현재 기호를 사용해 그립니다.</span>';
+    const symbolHelper = toolUsesColor(state.currentTool)
+      ? '지금은 칠 도구를 쓰는 중입니다. 다시 그리기/직선/사각형/원으로 바꾸면 이 기호가 사용됩니다.'
+      : '지금 선택한 도구로 이 기호가 바로 들어갑니다.';
 
     ui.selectionGlance.innerHTML = '' +
-      '<div class="selection-card">' +
+      '<div class="selection-card selection-card--tool">' +
         '<div class="selection-label">현재 도구</div>' +
         '<div class="selection-main">' +
           '<div class="selection-copy">' +
             '<strong>' + escapeHtml(tool.label || state.currentTool) + '</strong>' +
             '<span>' + escapeHtml(toolMeta) + '</span>' +
+            toolDetail +
           '</div>' +
         '</div>' +
       '</div>' +
       '<div class="selection-card selection-card--visual">' +
-        '<div class="selection-label">' + escapeHtml(title) + '</div>' +
+        '<div class="selection-label">현재 기호</div>' +
         '<div class="selection-main">' +
-          visual +
+          '<span class="selection-visual legend-cell-icon">' + pack.createPreviewSvg(symbol.id, 34) + '</span>' +
           '<div class="selection-copy">' +
-            '<strong>' + escapeHtml(mainLabel) + '</strong>' +
-            '<span>' + escapeHtml(helper) + '</span>' +
+            '<strong>' + escapeHtml(symbol.name_ko) + '</strong>' +
+            '<span>' + escapeHtml(symbolHelper) + '</span>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -1018,6 +1083,7 @@
     renderPatternPicker(state);
     renderNotes(state);
     renderReadout(state);
+    renderProjectTitle(state);
     renderActiveIndicators(state);
     renderSelectionGlance(state);
     renderInputs(state);
@@ -1190,6 +1256,13 @@
         openPatternPicker();
       });
     });
+
+    if (ui.btnDockModeToggle) {
+      ui.btnDockModeToggle.addEventListener("click", function () {
+        const nextExpanded = ui.body.classList.contains("dock-basic");
+        setDockModePreference(nextExpanded);
+      });
+    }
     ui.btnPatternPasteMode.addEventListener("click", function () {
       if (!startSelectedPatternPlacement()) {
         openPatternPicker();
@@ -1273,6 +1346,64 @@
       editor.resetView();
     });
 
+    function applyProjectTitle(rawValue, closeHeaderEditor) {
+      const nextTitle = String(rawValue || "").trim() || "새 대바늘 차트";
+      const changed = store.mutate(function (state) {
+        if (state.title === nextTitle) {
+          return false;
+        }
+        state.title = nextTitle;
+        return true;
+      }, { recordHistory: false, reason: "project-title" });
+      if (closeHeaderEditor) {
+        setHeaderProjectEditing(false);
+      }
+      if (changed) {
+        showToast('프로젝트 이름을 "' + nextTitle + '"로 바꿨습니다.', "success");
+      }
+    }
+
+    if (ui.btnApplyProjectTitle) {
+      ui.btnApplyProjectTitle.addEventListener("click", function () {
+        applyProjectTitle(ui.projectTitleInput && ui.projectTitleInput.value, false);
+      });
+    }
+    if (ui.projectTitleInput) {
+      ui.projectTitleInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          applyProjectTitle(ui.projectTitleInput.value, false);
+        }
+      });
+    }
+    if (ui.btnHeaderProjectToggle) {
+      ui.btnHeaderProjectToggle.addEventListener("click", function () {
+        const nextEditing = !ui.headerProjectPanel.classList.contains("is-editing");
+        setHeaderProjectEditing(nextEditing);
+      });
+    }
+    if (ui.headerProjectTitle) {
+      ui.headerProjectTitle.addEventListener("click", function () {
+        setHeaderProjectEditing(true);
+      });
+    }
+    if (ui.btnHeaderProjectApply) {
+      ui.btnHeaderProjectApply.addEventListener("click", function () {
+        applyProjectTitle(ui.headerProjectTitleInput && ui.headerProjectTitleInput.value, true);
+      });
+    }
+    if (ui.headerProjectTitleInput) {
+      ui.headerProjectTitleInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          applyProjectTitle(ui.headerProjectTitleInput.value, true);
+        }
+        if (event.key === "Escape") {
+          event.preventDefault();
+          setHeaderProjectEditing(false);
+        }
+      });
+    }
     ui.chartMode.addEventListener("change", function () {
       store.mutate(function (state) {
         state.chartMode = ui.chartMode.value === "circular" ? "circular" : "flat";
@@ -1392,6 +1523,7 @@
   });
 
   bindInteractionFeedback();
+  applyDockMode(loadDockModePreference());
   installShortcutBadges();
   bindEvents();
   store.subscribe(function (state) {
@@ -1399,6 +1531,10 @@
   });
   refreshUI(store.getState(), false);
 })();
+
+
+
+
 
 
 
